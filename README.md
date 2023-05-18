@@ -12,4 +12,4 @@ If you have Visual Studio, you can navigate to build > index.html, and Open with
 
 If not, you can simply run:
 
-    npm run dev.
+    npm run dev
