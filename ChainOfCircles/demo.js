@@ -6,12 +6,16 @@ var Engine = Matter.Engine,         // Manages updates for the world simulation.
     Composite = Matter.Composite,   // Collection of Matter.Body, Matter.Constraint, and Matter.Composite. Container that represents complex objects made of multiple parts.
     Mouse = Matter.Mouse,           // Contains methods for creating and manipulating mouse inputs.
     MouseConstraint = Matter.MouseConstraint,   // Allow for user interaction, providing ability to move bodies via mouse or touch.
-    Events = Matter.Events         // Events emitted by objects created by MouseConstraint
+    Events = Matter.Events,        // Events emitted by objects created by MouseConstraint
+
+    // A Constraint is an entity that connects two bodies.
+    Constraint = Matter.Constraint // Constraints are used for specifying that a fixed distance must be maintained between two bodies.
 
 
 // Create an engine
 var engine = Engine.create(),
     world = engine.world // The root Composite that will contain all bodies, constraints and other composites to be simulated by the engine
+    engine.world.gravity.y = 0.2; // Adjust the gravity value here
 
 // Create a renderer
 var render = Render.create({
@@ -56,11 +60,36 @@ var circles_array = []
 var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
 var left_wall = Bodies.rectangle(0, 610, 60, 810, { isStatic: true});
 var right_wall = Bodies.rectangle(800, 610, 60, 810, { isStatic: true});
-var circle = Bodies.circle(400, 200, 90, 90) // creating a circle
+
 circles_array.push(ground)
 circles_array.push(left_wall)
 circles_array.push(right_wall)
-circles_array.push(circle)
+
+var amount_of_circles = 5
+var prev = null
+
+// Creating chain of circles by use of for loop
+for (var i=0; i<amount_of_circles; i++) {
+    var circle = Bodies.circle(200, 100, 20, { restitution: 1 }) // Creating a circle
+    circles_array.push(circle)
+
+    if (prev) { // if prev exists,
+        // Constraint options
+        var options = {
+            // Our bodies (circles)
+            bodyA: circle,
+            bodyB: prev, // Conncting current circles to previous circle
+
+            length: 50, // Pixel distance between bodies
+            stiffness: 0.4 // Determines how much the constraint acts like a string vs a spring
+        }
+        var constraint = Constraint.create(options)
+        Composite.add(engine.world, constraint)  // Adds constraint to the given Composite
+    }
+
+    prev = circle
+}
+
 
 // Add all of the bodies to the world
 Composite.add(engine.world, circles_array)  // Adds array of Bodies to the given Composite
@@ -70,31 +99,6 @@ Render.run(render)
 var runner = Runner.create()
 
 Runner.run(runner, engine)
-
-// Add event listener for click event
-render.canvas.addEventListener('mousedown', function(event) {
-    var mousePosition = mouse.position;
-    
-    // Check if the clicked position is inside the circle
-    if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
-        // Generate a random color
-        var color = getRandomColor();
-        
-        // Change the circle's color
-        circle.render.fillStyle = color;
-        circle.render.strokeStyle = color;
-    }
-});
-
-// Function to generate a random color
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
 
 // Run the renderer
 Render.run(render)
