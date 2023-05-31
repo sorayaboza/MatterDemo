@@ -88,8 +88,31 @@ for (var i=0; i<amount_of_circles; i++) {
     }
 
     prev = circle
+
+    // Add event listener to each circle
+    Events.on(mouseConstraint, "mousedown", createClickListener(circle));
 }
 
+// Function to handle the "mousedown" event for a specific circle
+function createClickListener(circle) {
+    return function (event) {
+      var mousePosition = mouse.position;
+  
+      // Check if the clicked position is inside the circle
+      if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
+
+        var currentColor = circle.render.fillStyle;
+        var colors = ["rgb(242, 196, 89)", "rgb(189, 9, 102)", "rgb(9, 189, 90)", "rgb(9, 132, 189)"];
+        var currentIndex = colors.indexOf(currentColor);
+        var nextIndex = (currentIndex + 1) % colors.length;
+        var nextColor = colors[nextIndex];
+  
+        // Change the circle's color
+        circle.render.fillStyle = nextColor;
+        circle.render.strokeStyle = nextColor;
+      }
+    };
+}
 
 // Add all of the bodies to the world
 Composite.add(engine.world, circles_array)  // Adds array of Bodies to the given Composite
