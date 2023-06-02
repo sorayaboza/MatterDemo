@@ -59,37 +59,61 @@ Render.lookAt(render, {
 var walls = []
 var attractiveBodies = []
 
-// Creating a ground/walls and pushing to circles_array
+// Creating a walls and pushing to circles_array
+var ceiling = Bodies.rectangle(400, 0, 810, 60, { isStatic: true });
+var left_wall = Bodies.rectangle(0, 610, 60, 1200, { isStatic: true});
+var right_wall = Bodies.rectangle(800, 610, 60, 1200, { isStatic: true});
 var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-var left_wall = Bodies.rectangle(0, 610, 60, 810, { isStatic: true});
-var right_wall = Bodies.rectangle(800, 610, 60, 810, { isStatic: true});
 
-walls.push(ground)
+walls.push(ceiling)
 walls.push(left_wall)
 walls.push(right_wall)
+walls.push(ground)
 
-var attractiveShape = {
-    plugin: {
-        // An attractor function accepts two bodies: attractiveBody and attractedBody, where attractiveBody is always the attracting body and attractedBody is the body being attracted.
-        attractors: [
-            function(attractiveBody, attractedBody) {
-                return {
-                    x: (attractiveBody.position.x - attractedBody.position.x) * 1e-6,
-                    y: (attractiveBody.position.y - attractedBody.position.y) * 1e-6,
-                };
-            }
-        ]
+// Define the attractor function
+var attractorFunction = function (attractiveBody, attractedBody) { // Function takes 2 inputs, both involved in force calculation
+    var force = { x: 0, y: 0 }; // Initializing 'force' object to have x and y at 0
+  
+    // Attraction of B to A
+    if (attractiveBody === attractiveBody_A && attractedBody === attractiveBody_B) {
+        force.x = (attractiveBody.position.x - attractedBody.position.x) * 1e-6;
+        force.y = (attractiveBody.position.y - attractedBody.position.y) * 1e-6;
     }
+    // Attraction of A to B
+    if (attractiveBody === attractiveBody_B && attractedBody === attractiveBody_A) {
+        console.log("CHECK IF REACHED")
+        force.x = (attractiveBody.position.x - attractedBody.position.x) * 1e-6;
+        force.y = (attractiveBody.position.y - attractedBody.position.y) * 1e-6;
+    }
+
+    // Repulsion between A or B and C
+    else if (
+      (attractiveBody === attractiveBody_A || attractiveBody === attractiveBody_B) &&
+      attractedBody === attractiveBody_C
+    ) {
+        force.x = (attractiveBody.position.x - attractedBody.position.x) * -1e-6;
+        force.y = (attractiveBody.position.y - attractedBody.position.y) * -1e-6;
+    }
+  
+    return force;
 };
 
+// Create attractive shape
+var attractiveShape = {
+    plugin: {
+        attractors: [attractorFunction],
+    },
+};
+
+
 // Creating attractive circles
-var attractiveBody_A = Bodies.circle(200, 100, 30, attractiveShape)
+var attractiveBody_A = Bodies.circle(200, 100, 20, attractiveShape)
 var attractiveBody_B = Bodies.circle(200, 100, 20, attractiveShape)
-var attractiveBody_C = Bodies.circle(200, 100, 15, attractiveShape)
+var attractiveBody_C = Bodies.circle(200, 100, 20, attractiveShape)
 
 attractiveBodies.push(attractiveBody_A)
 attractiveBodies.push(attractiveBody_B)
-//attractiveBodies.push(repellingBody_C)
+attractiveBodies.push(attractiveBody_C)
 
 // Add all of the bodies to the world
 Composite.add(world, walls)  // Adds array of Bodies to the given Composite
