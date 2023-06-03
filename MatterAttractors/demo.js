@@ -70,27 +70,26 @@ walls.push(left_wall)
 walls.push(right_wall)
 walls.push(ground)
 
-// Define the force function
-var forceFunction = function (forcefulBody, forcedBody) { // Function takes 2 inputs, both involved in force calculation
-    var force = { x: 0, y: 0 }; // Initializing 'force' object to have x and y at 0
-    // Repulsion between A or B and C
-    if ( (forcefulBody === bodyA || forcefulBody === bodyB) && forcedBody === bodyC) {
-        force.x = (forcefulBody.position.x - forcedBody.position.x) * -1e-6;
-        force.y = (forcefulBody.position.y - forcedBody.position.y) * -1e-6;
-    }
-    // Attraction in all other cases
-    else {
-        force.x = (forcefulBody.position.x - forcedBody.position.x) * 0.00001;
-        force.y = (forcefulBody.position.y - forcedBody.position.y) * 0.00001;
-    }
-  
-    return force;
-};
-
 // Create force shape
 var forceShape = {
     plugin: {
-        attractors: [forceFunction],
+        attractors: [
+            function (forcefulBody, forcedBody) { // Function takes 2 inputs, both involved in force calculation
+                var force = { x: 0, y: 0 }; // Initializing 'force' object to have x and y at 0
+                // Repulsion between A or B and C
+                if ( (forcefulBody === bodyA || forcefulBody === bodyB) && forcedBody === bodyC) {
+                    force.x = (forcefulBody.position.x - forcedBody.position.x) * -1e-6;
+                    force.y = (forcefulBody.position.y - forcedBody.position.y) * -1e-6;
+                }
+                // Attraction in all other cases
+                else {
+                    force.x = (forcefulBody.position.x - forcedBody.position.x) * 0.00001;
+                    force.y = (forcefulBody.position.y - forcedBody.position.y) * 0.00001;
+                }
+              
+                return force;
+            }
+        ],
     },
 };
 
