@@ -70,24 +70,24 @@ walls.push(left_wall)
 walls.push(right_wall)
 walls.push(ground)
 
+let strand = ["G", "A", "C", "A", "G"];
+
 // Create force shape
 var forceShape = {
     plugin: {
         attractors: [
-            function (forcefulBody, forcedBody) { // Function takes 2 inputs, both involved in force calculation
-                var force = { x: 0, y: 0 }; // Initializing 'force' object to have x and y at 0
-                if ((forcefulBody == bodyA && forcedBody == bodyB) || (forcefulBody == bodyB && forcedBody == bodyA)) {
+            // Determine force of attraction between bodies 1 and 2
+            function (b1, b2) {
+                var force = { x: 0, y: 0 };
+                // console.log(body1.ntType, body2.ntType)
+                if ((b1.ntype == "G" && b2.ntype == "A") || (b2.ntype == "G" && b1.ntype == "A")) {
                     force.x = (forcefulBody.position.x - forcedBody.position.x) * 0.00001;
                     force.y = (forcefulBody.position.y - forcedBody.position.y) * 0.00001;
                 }
-                if ((forcefulBody == bodyB && forcedBody == bodyC) || (forcefulBody == bodyC && forcedBody == bodyB)) {
+                if ((b1.ntype == "A" && b2.ntype == "A") || (b2.ntype == "G" && b1.ntype == "G") || (b2.ntype == "C" && b1.ntype == "C")) {
                     force.x = (forcefulBody.position.x - forcedBody.position.x) * -1e-6;
                     force.y = (forcefulBody.position.y - forcedBody.position.y) * -1e-6;
                 }
-                if ((forcefulBody == bodyA && forcedBody == bodyC) || (forcefulBody == bodyC && forcedBody == bodyA)) {
-                    force.x = (forcefulBody.position.x - forcedBody.position.x) * -1e-6;
-                    force.y = (forcefulBody.position.y - forcedBody.position.y) * -1e-6;
-                } 
                 return force;
             }
         ],
@@ -95,13 +95,23 @@ var forceShape = {
 };
 
 // Creating attractive/repulsive circles
-var bodyA = Bodies.circle(200, 100, 25, forceShape)
-var bodyB = Bodies.circle(200, 100, 25, forceShape)
-var bodyC = Bodies.circle(200, 100, 25, forceShape)
+strand.forEach(nt => {
+    // TODO: Add these to a chain rather than at random locations
+    let body = Bodies.circle(200, 100, 25, forceShape)
+    body.ntType = nt 
+    switch(nt) {
+        case "G":
+            body.render.fillStyle = "Red"     
+            break;
+        case "A":
+            body.render.fillStyle = "Green"     
+            break;  
+        default:
+            body.render.fillStyle = "Yellow"    
+    }
+    forceBodies.push(body)
+});
 
-forceBodies.push(bodyA)
-forceBodies.push(bodyB)
-forceBodies.push(bodyC)
 
 // Add all of the bodies to the world
 Composite.add(world, walls)  // Adds array of rectangular Bodies to the given Composite
