@@ -17,7 +17,7 @@ var Engine = Matter.Engine,         // Manages updates for the world simulation.
 // Create an engine
 var engine = Engine.create(),
     world = engine.world // The root Composite that will contain all bodies, constraints and other composites to be simulated by the engine
-    engine.world.gravity.y = 0.2; // Adjust the gravity value here
+    engine.world.gravity.y = 0.0; // Adjust the gravity value here
 
 // Create a renderer
 var render = Render.create({
@@ -60,10 +60,10 @@ var walls = []
 var forceBodies = []
 
 // Creating a walls and pushing to walls
-var ceiling = Bodies.rectangle(400, 0, 810, 60, { isStatic: true });
-var left_wall = Bodies.rectangle(0, 610, 60, 1200, { isStatic: true});
-var right_wall = Bodies.rectangle(800, 610, 60, 1200, { isStatic: true});
-var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+var ceiling = Bodies.rectangle(400, 0, 810, 60, { isStatic: true })
+var left_wall = Bodies.rectangle(0, 610, 60, 1200, { isStatic: true})
+var right_wall = Bodies.rectangle(800, 610, 60, 1200, { isStatic: true})
+var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true })
 
 walls.push(ceiling)
 walls.push(left_wall)
@@ -71,7 +71,12 @@ walls.push(right_wall)
 walls.push(ground)
 
 let strand = ["G", "A", "C", "A", "G", "U"];
-let x = 0
+
+let GC_BOND_STRENGTH = 0.01
+let AU_BOND_STRENGTH = 0.001
+let GU_BOND_STRENGTH = 0.0001
+let REPEL_BOND_STRENGTH = -1e-6
+
 // Create force shape
 var forceShape = {
     plugin: {
@@ -81,29 +86,29 @@ var forceShape = {
                 var force = { x: 0, y: 0 };
                 // GC pairs are the strongest.
                 if ((b1.ntType == "G" && b2.ntType == "C") || (b2.ntType == "C" && b1.ntType == "C")) {
-                    force.x = (b1.position.x - b2.position.x) * 0.0001;
-                    force.y = (b1.position.y - b2.position.y) * 0.0001;
+                    force.x = (b1.position.x - b2.position.x) * GC_BOND_STRENGTH
+                    force.y = (b1.position.y - b2.position.y) * GC_BOND_STRENGTH
                 }
                 // AU pairs are medium strength.
                 if ((b1.ntType == "U" && b2.ntType == "A") || (b2.ntType == "U" && b1.ntType == "A")) {
-                    force.x = (b1.position.x - b2.position.x) * 0.00001;
-                    force.y = (b1.position.y - b2.position.y) * 0.00001;
+                    force.x = (b1.position.x - b2.position.x) * AU_BOND_STRENGTH
+                    force.y = (b1.position.y - b2.position.y) * AU_BOND_STRENGTH
                 }
                 // GU pairs are the weakest.
                 if ((b1.ntType == "U" && b2.ntType == "G") || (b2.ntType == "U" && b1.ntType == "G")) {
-                    force.x = (b1.position.x - b2.position.x) * 0.000001;
-                    force.y = (b1.position.y - b2.position.y) * 0.000001;
+                    force.x = (b1.position.x - b2.position.x) * GU_BOND_STRENGTH
+                    force.y = (b1.position.y - b2.position.y) * GU_BOND_STRENGTH
                 }
                 // Same types repel.
                 if ((b1.ntType == "A" && b2.ntType == "A") || (b2.ntType == "G" && b1.ntType == "G") 
                 || (b2.ntType == "C" && b1.ntType == "C") || (b2.ntType == "U" && b1.ntType == "U")) {
-                    force.x = (b1.position.x - b2.position.x) * -1e-6;
-                    force.y = (b1.position.y - b2.position.y) * -1e-6;
+                    force.x = (b1.position.x - b2.position.x) * REPEL_BOND_STRENGTH
+                    force.y = (b1.position.y - b2.position.y) * REPEL_BOND_STRENGTH
                 }
                 // All else repel.
                 else {
-                    force.x = (b1.position.x - b2.position.x) * -1e-6;
-                    force.y = (b1.position.y - b2.position.y) * -1e-6;
+                    force.x = (b1.position.x - b2.position.x) * REPEL_BOND_STRENGTH
+                    force.y = (b1.position.y - b2.position.y) * REPEL_BOND_STRENGTH
                 }
                 return force;
             }
@@ -113,24 +118,30 @@ var forceShape = {
 
 var prev = null
 
+var color = {
+    red: "rgb(189, 9, 102)",
+    green: "rgb(9, 189, 90)",
+    blue:  "rgb(9, 132, 189)",
+    yellow: "rgb(242, 196, 89)"
+}
+
 // Creating attractive/repulsive circles
 strand.forEach(nt => {
-    // TODO: Add these to a chain rather than at random locations
     console.log(nt)
     let body = Bodies.circle(200, 100, 25, forceShape)
     body.ntType = nt 
     switch(nt) {
         case "A":
-            body.render.fillStyle = "rgb(189, 9, 102)" // Red
+            body.render.fillStyle = color.red // Red
             break;
         case "G":
-            body.render.fillStyle = "rgb(9, 189, 90)" // Green
+            body.render.fillStyle = color.green // Green
             break;
         case "U":
-            body.render.fillStyle = "rgb(9, 132, 189)" // Blue
+            body.render.fillStyle = color.blue // Blue
             break;  
         case "C":
-            body.render.fillStyle = "rgb(242, 196, 89)" // Yellow
+            body.render.fillStyle = color.yellow // Yellow
             break; 
     }
     forceBodies.push(body)
@@ -154,43 +165,131 @@ strand.forEach(nt => {
     Events.on(mouseConstraint, "mousedown", createClickListener(body));
 });
 
-// Function to handle the "mousedown" event for a specific circle
+var key = {
+    a: 65,
+    g: 71,
+    t: 84,
+    c: 67
+}
+
+var prevClickedCircle = null;
+
 function createClickListener(circle) {
+    var originalColor = circle.render.fillStyle; // Store the original color of the circle
+    var selectedColor = selectColor(originalColor); // Calculate a darker shade of the original color
+
     return function (event) {
         var mousePosition = mouse.position;
 
         // Check if the clicked position is inside the circle
         if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
-            var currentColor = circle.render.fillStyle;
-            var colors = ["rgb(242, 196, 89)", "rgb(189, 9, 102)", "rgb(9, 189, 90)", "rgb(9, 132, 189)"];
-            var currentIndex = colors.indexOf(currentColor);
-            var nextIndex = (currentIndex + 1) % colors.length;
-            var nextColor = colors[nextIndex];
-
-            // Change the circle's color
-            circle.render.fillStyle = nextColor;
-            circle.render.strokeStyle = nextColor;
-
-            // Update the ntType based on the new color
-            switch (nextColor) {
-                case "rgb(189, 9, 102)": // Red
-                    circle.ntType = "G";
-                    break;
-                case "rgb(9, 189, 90)": // Green
-                    circle.ntType = "A";
-                    break;
-                case "rgb(9, 132, 189)": // Blue
-                    circle.ntType = "T";
-                    break;
-                case "rgb(242, 196, 89)": // Yellow
-                    circle.ntType = "C";
-                    break;
+            // Restore the original color for the previously clicked circle (if any)
+            if (prevClickedCircle && prevClickedCircle !== circle) {
+                prevClickedCircle.render.fillStyle = prevClickedCircle.originalColor;
+                prevClickedCircle.render.strokeStyle = prevClickedCircle.originalColor;
             }
+
+            // Change the color of the clicked circle to the selected color
+            circle.render.fillStyle = selectedColor;
+            circle.render.strokeStyle = selectedColor;
+
+            prevClickedCircle = circle; // Store the currently clicked circle
+            prevClickedCircle.originalColor = originalColor; // Store the original color separately
+
+            document.onkeydown = function (e) {
+                var originalNtType = circle.ntType; // Store the original ntType
+            
+                switch (e.keyCode) {
+                    case key.a:
+                        updateCircleNtType(circle, "A", color.red);
+                        break;
+                    case key.g:
+                        updateCircleNtType(circle, "G", color.green);
+                        break;
+                    case key.t:
+                        updateCircleNtType(circle, "T", color.blue);
+                        break;
+                    case key.c:
+                        updateCircleNtType(circle, "C", color.yellow);
+                        break;
+                    default:
+                        return;
+                }
+            
+                // Update the corresponding element in the 'strand' array if ntType is changed
+                if (circle.ntType !== originalNtType) {
+                    var circleIndex = forceBodies.indexOf(circle);
+                    if (circleIndex !== -1) {
+                        strand[circleIndex] = circle.ntType;
+                    }
+                }
+                circle.render.strokeStyle = circle.render.fillStyle; // Set stroke style to the updated fill style
+            };
+            
+            function updateCircleNtType(circle, ntType, color) {
+                circle.ntType = ntType;
+                circle.customColor = color; // Store the updated color in a separate property
+                circle.render.fillStyle = circle.customColor; // Update color
+                circle.render.strokeStyle = circle.customColor; // Set stroke style to the updated fill style
+            }
+            
         }
     };
 }
+  
 
+// Helper function to lighten a given color
+function selectColor(color) {
+    // Convert the color string to RGB values
+    var rgb = color.match(/\d+/g);
+    var r = parseInt(rgb[0]);
+    var g = parseInt(rgb[1]);
+    var b = parseInt(rgb[2]);
+    
+    // Calculate the lighter shade (decrease each RGB component value)
+    var selectedR = Math.min(255, r - 50);
+    var selectedG = Math.min(255, g - 50);
+    var selectedB = Math.min(255, b - 50);
+    
+    // Construct the lighter color string in RGB format
+    return "rgb(" + selectedR + ", " + selectedG + ", " + selectedB + ")";
+}
 
+// // Function to handle the "mousedown" event for a specific circle
+// function createClickListener(circle) {
+//     return function (event) {
+//         var mousePosition = mouse.position;
+
+//         // Check if the clicked position is inside the circle
+//         if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
+//             var currentColor = circle.render.fillStyle;
+//             var colors = [color.red, color.green, color.blue, color.yellow];
+//             var currentIndex = colors.indexOf(currentColor);
+//             var nextIndex = (currentIndex + 1) % colors.length;
+//             var nextColor = colors[nextIndex];
+
+//             // Change the circle's color
+//             circle.render.fillStyle = nextColor;
+//             circle.render.strokeStyle = nextColor;
+
+//             // Update the ntType based on the new color
+//             switch (nextColor) {
+//                 case color.red: // Red
+//                     circle.ntType = "G"
+//                     break;
+//                 case color.green: // Green
+//                     circle.ntType = "A"
+//                     break;
+//                 case color.blue: // Blue
+//                     circle.ntType = "T"
+//                     break;
+//                 case color.yellow: // Yellow
+//                     circle.ntType = "C"
+//                     break;
+//             }
+//         }
+//     };
+// }
 
 // Add all of the bodies to the world
 Composite.add(world, walls)  // Adds array of rectangular Bodies to the given Composite
