@@ -17,7 +17,7 @@ var Engine = Matter.Engine,         // Manages updates for the world simulation.
 // Create an engine
 var engine = Engine.create(),
     world = engine.world // The root Composite that will contain all bodies, constraints and other composites to be simulated by the engine
-    engine.world.gravity.y = 0.0; // Adjust the gravity value here
+    //engine.world.gravity.y = 0.0; // Adjust the gravity value here
 
 // Create a renderer
 var render = Render.create({
@@ -61,13 +61,18 @@ var forceBodies = []
 
 // Creating a walls and pushing to walls
 var ceiling = Bodies.rectangle(400, 0, 810, 60, { isStatic: true })
-var left_wall = Bodies.rectangle(0, 610, 60, 1200, { isStatic: true})
-var right_wall = Bodies.rectangle(800, 610, 60, 1200, { isStatic: true})
+var leftWall = Bodies.rectangle(0, 610, 60, 1250, { isStatic: true})
+var rightWall = Bodies.rectangle(800, 610, 60, 1250, { isStatic: true})
 var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true })
 
+ceiling.render.lineWidth = 6
+leftWall.render.lineWidth = 6
+rightWall.render.lineWidth = 6
+ground.render.lineWidth = 6
+
 walls.push(ceiling)
-walls.push(left_wall)
-walls.push(right_wall)
+walls.push(leftWall)
+walls.push(rightWall)
 walls.push(ground)
 
 let strand = ["A", "A", "G", "A", "C", "U", "U", "C"];
@@ -125,6 +130,7 @@ strand.forEach(nt => {
     console.log(nt)
     let body = Bodies.circle(200, 100, 25, forceShape)
     body.ntType = nt 
+    body.render.lineWidth = 6
     switch(nt) {
         case "A":
             body.render.fillStyle = color.yellow
@@ -171,35 +177,56 @@ var prevClickedCircle = null;
 
 function createClickListener(circle) {
     return function (event) {
-      var mousePosition = mouse.position;
-  
-      if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
-        document.onkeydown = function (e) {
-          switch (e.keyCode) {
-            case key.a:
-              updateCircleNtType(circle, "A", color.yellow);
-              break;
-            case key.u:
-              updateCircleNtType(circle, "U", color.blue);
-              break;
-            case key.g:
-              updateCircleNtType(circle, "G", color.red);
-              break;
-            case key.c:
-              updateCircleNtType(circle, "C", color.green);
-              break;
-            default:
-              return;
-          }
-        };
-  
-        function updateCircleNtType(circle, ntType, color) {
-          circle.ntType = ntType;
-          circle.render.fillStyle = color;
+    var mousePosition = mouse.position;
+
+    // Check if the click occurred outside the bounds of all circles
+    var clickedOutsideCircles = forceBodies.every(function (circle) {
+        return !Matter.Bounds.contains(circle.bounds, mousePosition);
+    });
+    // If a user clicks outside of the circles, the circles will be unselected
+    if (clickedOutsideCircles) {
+        // Restore opacity of all circles
+        forceBodies.forEach(function (circle) {
+          circle.render.opacity = 1;
+        });
+        prevClickedCircle = null;
+    }
+    
+    if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
+        // Restore opacity of the previously clicked circle
+        if (prevClickedCircle) {
+            prevClickedCircle.render.opacity = 1;
         }
-      }
+
+        circle.render.opacity = 0.5; // Lower the opacity of the currently clicked circle
+        prevClickedCircle = circle;
+
+        document.onkeydown = function (e) {
+            switch (e.keyCode) {
+            case key.a:
+                updateCircleNtType(circle, "A", color.yellow);
+                break;
+            case key.u:
+                updateCircleNtType(circle, "U", color.blue);
+                break;
+            case key.g:
+                updateCircleNtType(circle, "G", color.red);
+                break;
+            case key.c:
+                updateCircleNtType(circle, "C", color.green);
+                break;
+            default:
+                return;
+            }
+        };
+
+        function updateCircleNtType(circle, ntType, color) {
+            circle.ntType = ntType;
+            circle.render.fillStyle = color;
+        }
+        }
     };
-  }
+}
    
 
 // Helper function to darken a given color
