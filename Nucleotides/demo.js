@@ -1,3 +1,40 @@
+/* ------------------ ADUJUSTABLE PARAMETERS BELOW ------------------ */
+
+let strand = ["A", "A", "G", "A", "C", "U", "U", "C"];
+
+let GC_BOND_STRENGTH = 1e-4
+let AU_BOND_STRENGTH = 1e-6
+let GU_BOND_STRENGTH = 1e-7
+let REPEL_BOND_STRENGTH = -1e-5
+
+/* ------------------ ADUJUSTABLE PARAMETERS ABOVE ------------------ */
+
+
+
+/* ------------------ BUTTON SELECTION BELOW ------------------ */
+// Get references to the buttons
+const buttonA = document.getElementById("buttonA");
+const buttonU = document.getElementById("buttonU");
+const buttonG = document.getElementById("buttonG");
+const buttonC = document.getElementById("buttonC");
+
+// Function to select a button and deselect others
+function selectButton(selectedButton) {
+    const buttons = [buttonA, buttonU, buttonG, buttonC];
+
+    buttons.forEach((button) => {
+        button.classList.remove("selected");
+    });
+
+    if (selectedButton == "none"){ return }
+
+    selectedButton.classList.add("selected");
+}
+/* ------------------ BUTTON SELECTION ABOVE ------------------ */
+
+
+
+/* ------------------ MATTER FUNCTIONS BELOW ------------------ */
 Matter.use('matter-attractors')
 
 // Module aliases
@@ -74,13 +111,6 @@ walls.push(ceiling)
 walls.push(leftWall)
 walls.push(rightWall)
 walls.push(ground)
-
-let strand = ["A", "A", "G", "A", "C", "U", "U", "C"];
-
-let GC_BOND_STRENGTH = 1e-4
-let AU_BOND_STRENGTH = 1e-6
-let GU_BOND_STRENGTH = 1e-7
-let REPEL_BOND_STRENGTH = -1e-5
 
 // Create force shape
 var forceShape = {
@@ -166,6 +196,30 @@ strand.forEach(nt => {
     Events.on(mouseConstraint, "mousedown", createClickListener(body));
 });
 
+// // Applying buoyancy
+// let applyBouyancy = body => {
+//     let waterPlaneY = 300
+//     let vy = body.position.y - waterPlaneY
+//     let distBetweenBodyAndWaterPlane = Math.sqrt(vy * vy)
+//     let force = 0.00008;
+//     if (distBetweenBodyAndWaterPlane < waterPlaneY) {
+//         body.timeScale = 1  // timeScale specifies per-body time scaling.
+//     } else {
+//         body.timeScale = 0.2
+//     }
+//     Matter.Body.setMass(body, 1);
+//     body.frictionAir = 0.05
+//     Matter.Body.applyForce(body, body.position, {
+//         x: 0,
+//         y: -distBetweenBodyAndWaterPlane * force
+//     })
+// }
+
+// // Apply buoyancy to each body in the forceBodies array
+// forceBodies.forEach(body => {
+//     applyBouyancy(body);
+// });
+
 var key = {
     a: 65,
     u: 85,
@@ -185,35 +239,44 @@ function createClickListener(circle) {
     });
     // If a user clicks outside of the circles, the circles will be unselected
     if (clickedOutsideCircles) {
+        selectButton("none")
         // Restore opacity of all circles
         forceBodies.forEach(function (circle) {
-          circle.render.opacity = 1;
+          circle.render.strokeStyle = 'black'
+          circle.render.lineWidth = 6
         });
         prevClickedCircle = null;
     }
     
+    // If user clicks a circle,
     if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
         // Restore opacity of the previously clicked circle
         if (prevClickedCircle) {
-            prevClickedCircle.render.opacity = 1;
+            selectButton("none")
+            prevClickedCircle.render.strokeStyle = 'black'
+            prevClickedCircle.render.lineWidth = 6
         }
-
-        circle.render.opacity = 0.5; // Lower the opacity of the currently clicked circle
+        circle.render.strokeStyle = 'white' // Change line color to white
+        circle.render.lineWidth = 8
         prevClickedCircle = circle;
 
         document.onkeydown = function (e) {
             switch (e.keyCode) {
             case key.a:
                 updateCircleNtType(circle, "A", color.yellow);
+                selectButton(buttonA)
                 break;
             case key.u:
                 updateCircleNtType(circle, "U", color.blue);
+                selectButton(buttonU)
                 break;
             case key.g:
                 updateCircleNtType(circle, "G", color.red);
+                selectButton(buttonG)
                 break;
             case key.c:
                 updateCircleNtType(circle, "C", color.green);
+                selectButton(buttonC)
                 break;
             default:
                 return;
@@ -265,43 +328,4 @@ var runner = Runner.create()
 
 // Run the engine
 Runner.run(runner, engine)
-
-
-
-
-
-/* ---------------- BUTTON SELECTION ---------------- */
-
-// Get references to the buttons
-const buttonA = document.getElementById("buttonA");
-const buttonU = document.getElementById("buttonU");
-const buttonG = document.getElementById("buttonG");
-const buttonC = document.getElementById("buttonC");
-
-// Add click event listeners to the buttons
-buttonA.addEventListener("click", () => {
-  selectButton(buttonA);
-});
-buttonU.addEventListener("click", () => {
-  selectButton(buttonU);
-});
-buttonG.addEventListener("click", () => {
-  selectButton(buttonG);
-});
-buttonC.addEventListener("click", () => {
-  selectButton(buttonC);
-});
-
-// Function to select a button and deselect others
-function selectButton(selectedButton) {
-  const buttons = [buttonA, buttonU, buttonG, buttonC];
-
-  buttons.forEach((button) => {
-    button.classList.remove("selected");
-  });
-
-  selectedButton.classList.add("selected");
-}
-
-// Select button A by default
-selectButton(buttonA);
+/* ------------------ MATTER FUNCTIONS ABOVE ------------------ */
