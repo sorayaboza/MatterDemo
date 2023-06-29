@@ -23,9 +23,6 @@ button {
   flex-direction: column;
   margin-bottom: 10px;
 }
-.nt:hover {
-  outline: 2px solid rgb(210, 210, 229);
-}
 
 button.selected {
   outline: 2px solid rgb(210, 210, 229);
