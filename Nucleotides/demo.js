@@ -1,17 +1,17 @@
-/* ------------------ ADUJUSTABLE PARAMETERS BELOW ------------------ */
+/* ------------------ ADUJUSTABLE PARAMETERS ------------------ */
 
-let strand = ["A", "A", "G", "A", "C", "U", "U", "C"];
+let strand = ["G", "U", "U", "A", "U", "U", "U", "C"];
+
+let gravity = -1.4
+let airFriction = 1.5
 
 let GC_BOND_STRENGTH = 1e-4
 let AU_BOND_STRENGTH = 1e-6
 let GU_BOND_STRENGTH = 1e-7
 let REPEL_BOND_STRENGTH = -1e-5
 
-/* ------------------ ADUJUSTABLE PARAMETERS ABOVE ------------------ */
 
-
-
-/* ------------------ BUTTON SELECTION BELOW ------------------ */
+/* ------------------ BUTTON SELECTION ------------------ */
 // Get references to the buttons
 const buttonA = document.getElementById("buttonA");
 const buttonU = document.getElementById("buttonU");
@@ -30,11 +30,9 @@ function selectButton(selectedButton) {
 
     selectedButton.classList.add("selected");
 }
-/* ------------------ BUTTON SELECTION ABOVE ------------------ */
 
 
-
-/* ------------------ MATTER FUNCTIONS BELOW ------------------ */
+/* ------------------ MATTER FUNCTIONS ------------------ */
 Matter.use('matter-attractors')
 
 // Module aliases
@@ -54,7 +52,7 @@ var Engine = Matter.Engine,         // Manages updates for the world simulation.
 // Create an engine
 var engine = Engine.create(),
     world = engine.world // The root Composite that will contain all bodies, constraints and other composites to be simulated by the engine
-    //engine.world.gravity.y = 0.0; // Adjust the gravity value here
+    engine.world.gravity.y = gravity;
 
 // Create a renderer
 var render = Render.create({
@@ -196,29 +194,29 @@ strand.forEach(nt => {
     Events.on(mouseConstraint, "mousedown", createClickListener(body));
 });
 
-// // Applying buoyancy
-// let applyBouyancy = body => {
-//     let waterPlaneY = 300
-//     let vy = body.position.y - waterPlaneY
-//     let distBetweenBodyAndWaterPlane = Math.sqrt(vy * vy)
-//     let force = 0.00008;
-//     if (distBetweenBodyAndWaterPlane < waterPlaneY) {
-//         body.timeScale = 1  // timeScale specifies per-body time scaling.
-//     } else {
-//         body.timeScale = 0.2
-//     }
-//     Matter.Body.setMass(body, 1);
-//     body.frictionAir = 0.05
-//     Matter.Body.applyForce(body, body.position, {
-//         x: 0,
-//         y: -distBetweenBodyAndWaterPlane * force
-//     })
-// }
+// Applying buoyancy
+let applyBouyancy = body => {
+    let waterPlaneY = 300
+    let vy = body.position.y - waterPlaneY
+    let distBetweenBodyAndWaterPlane = Math.sqrt(vy * vy)
+    let force = 0.00008;
+    if (distBetweenBodyAndWaterPlane < waterPlaneY) {
+        body.timeScale = 1  // timeScale specifies per-body time scaling.
+    } else {
+        body.timeScale = 0.2
+    }
+    Matter.Body.setMass(body, 1);
+    body.frictionAir = airFriction
+    Matter.Body.applyForce(body, body.position, {
+        x: 0,
+        y: -distBetweenBodyAndWaterPlane * force
+    })
+}
 
-// // Apply buoyancy to each body in the forceBodies array
-// forceBodies.forEach(body => {
-//     applyBouyancy(body);
-// });
+// Apply buoyancy to each body in the forceBodies array
+forceBodies.forEach(body => {
+    applyBouyancy(body);
+});
 
 var key = {
     a: 65,
@@ -328,4 +326,3 @@ var runner = Runner.create()
 
 // Run the engine
 Runner.run(runner, engine)
-/* ------------------ MATTER FUNCTIONS ABOVE ------------------ */
