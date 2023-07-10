@@ -1,4 +1,4 @@
-/* ----------------- START ----------------- */
+/* ----------------- PAGES ----------------- */
 .start {
   position: absolute;
   left: 50%;
@@ -8,12 +8,29 @@
   font-size: 50px;
   transform: translate(-50%, -50%);
 }
-a, a:active, a:visited {
-  color: black;
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 5px;
+}
+.page-title {
+  font-size: 50px;
+  color: rgb(200, 90, 193);
   font-weight: bold;
 }
-a:link {
-  text-decoration: none;
+.link-cntr {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+a, a:active, a:visited {
+  color: rgb(223, 182, 229);
+  font-size: 30px;
+  display: flex;
+  text-align: center;
+  padding: 7px;
+  margin: 5px;
 }
 a:hover {
   color: hotpink;
@@ -23,8 +40,6 @@ a:hover {
 /* ----------------- LEVELS ----------------- */
 body {
   background: rgb(50, 50, 99);
-  display: flex;
-  flex-direction: row;
   max-width: 50%;
 }
 
@@ -42,8 +57,6 @@ button {
 
 .nt {
   color: rgb(20, 20, 70);
-  display: flex;
-  flex-direction: column;
   margin-bottom: 10px;
 }
 
