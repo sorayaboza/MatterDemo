@@ -1,0 +1,54 @@
+/* ----------------- START ----------------- */
+.start {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 50px;
+  transform: translate(-50%, -50%);
+}
+a, a:active, a:visited {
+  color: black;
+  font-weight: bold;
+}
+a:link {
+  text-decoration: none;
+}
+a:hover {
+  color: hotpink;
+}
+
+
+/* ----------------- LEVELS ----------------- */
+body {
+  background: rgb(50, 50, 99);
+  display: flex;
+  flex-direction: row;
+  max-width: 50%;
+}
+
+button {
+  margin: 5px;
+  padding: 5px 10px;
+  font-size: 24px;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  border: 3px solid black;
+  border-radius: 15px;
+  box-shadow: 0 9px rgb(20, 20, 70);
+}
+
+.nt {
+  color: rgb(20, 20, 70);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+button.selected {
+  outline: 2px solid rgb(210, 210, 229);
+  transform: translateY(4px);
+  box-shadow: none;
+}

@@ -1,9 +1,7 @@
 /* ------------------ ADUJUSTABLE PARAMETERS ------------------ */
 
-let strand = ["G", "U", "U", "A", "U", "U", "U", "C"];
-
 let gravity = -1.4
-let airFriction = 1.5
+let airFriction = 0.5
 
 let GC_BOND_STRENGTH = 1e-4
 let AU_BOND_STRENGTH = 1e-6
