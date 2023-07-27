@@ -29,6 +29,32 @@ function selectButton(selectedButton) {
     selectedButton.classList.add("selected");
 }
 
+// Function to update the color and nt type of a given circle
+function updateCircleNtType(circle, ntType, color) {
+    circle.ntType = ntType;
+    circle.render.fillStyle = color;
+}
+
+// Function to make buttons functional
+function buttonPressed(selectedCircle) {
+    buttonA.onclick = function(){
+        updateCircleNtType(selectedCircle, "A", color.yellow);
+        selectButton(buttonA)
+    }
+    buttonU.onclick = function(){
+        updateCircleNtType(selectedCircle, "U", color.blue);
+        selectButton(buttonU)
+    }
+    buttonG.onclick = function(){
+        updateCircleNtType(selectedCircle, "G", color.red);
+        selectButton(buttonG)
+    }
+    buttonC.onclick = function(){
+        updateCircleNtType(selectedCircle, "C", color.green);
+        selectButton(buttonC)
+    }
+}
+
 
 /* ------------------ MATTER FUNCTIONS ------------------ */
 Matter.use('matter-attractors')
@@ -246,6 +272,7 @@ function createClickListener(circle) {
     
     // If user clicks a circle,
     if (Matter.Bounds.contains(circle.bounds, mousePosition)) {
+        buttonPressed(circle)
         // Restore opacity of the previously clicked circle
         if (prevClickedCircle) {
             selectButton("none")
@@ -278,11 +305,6 @@ function createClickListener(circle) {
                 return;
             }
         };
-
-        function updateCircleNtType(circle, ntType, color) {
-            circle.ntType = ntType;
-            circle.render.fillStyle = color;
-        }
         }
     };
 }
