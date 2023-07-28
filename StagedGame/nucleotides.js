@@ -237,9 +237,28 @@ let applyBouyancy = body => {
     })
 }
 
-// Apply buoyancy to each body in the forceBodies array
+// Sample a random normal distribution.
+//  From https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+function gaussianRandom(mean=0, stdev=1) {
+    const u = 1 - Math.random(); // Converting [0,1) to (0,1]
+    const v = Math.random();
+    const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    // Transform to the desired mean and standard deviation:
+    return z * stdev + mean;
+}
+
+// Brownian motion
+let brownianMotion = body => {
+    Matter.Body.applyForce(body, body.position, {
+        x: gaussianRandom(0, .15),
+        y: gaussianRandom(0, .15)
+    })
+}
+
+// Apply external forces
 forceBodies.forEach(body => {
     applyBouyancy(body);
+    brownianMotion(body);
 });
 
 var key = {
